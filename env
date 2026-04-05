@@ -1,0 +1,5 @@
+APP_TITLE="Brand Audit API"
+APP_VERSION="0.1.0"
+DEBUG=true
+DATABASE_URL="sqlite+aiosqlite:///./brand_audit.db"
+CORS_ORIGINS=["http://localhost:5173","http://localhost:3000"]
