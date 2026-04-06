@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db.session import Base, engine
-from app.routers import health, brands, reviews, parser
+from app.routers import health, brands, reviews, parser, sentiment
 
 
 @asynccontextmanager
@@ -61,7 +61,8 @@ app.include_router(brands.router)
 app.include_router(reviews.router)
 app.include_router(parser.router)
 
+app.include_router(sentiment.router)
+
 # Здесь будем подключать роутеры следующих фаз:
-# app.include_router(reviews.router, prefix="/reviews")
-# app.include_router(sentiment.router, prefix="/sentiment")
 # app.include_router(report.router, prefix="/report")
+
