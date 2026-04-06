@@ -44,11 +44,29 @@ LABEL_MAP = {
 }
 
 
-def analyze_text(text: str) -> dict:
+def _analyze_heuristic(rating: float | None) -> dict:
+    """Эвристика по рейтингу — используется когда USE_ML_SENTIMENT=false."""
+    if rating is None:
+        return {"label": "neutral", "positive": 0.0, "negative": 0.0, "neutral": 1.0}
+    if rating >= 4:
+        return {"label": "positive", "positive": 0.9, "negative": 0.05, "neutral": 0.05}
+    if rating == 3:
+        return {"label": "neutral", "positive": 0.2, "negative": 0.2, "neutral": 0.6}
+    return {"label": "negative", "positive": 0.05, "negative": 0.9, "neutral": 0.05}
+
+
+def analyze_text(text: str, rating: float | None = None) -> dict:
     """
-    Возвращает dict с ключами:
-        label, positive, negative, neutral
+    Возвращает dict с ключами: label, positive, negative, neutral.
+    Если USE_ML_SENTIMENT=true — используем rubert модель.
+    Если USE_ML_SENTIMENT=false — эвристика по рейтингу.
     """
+    import os
+    use_ml = os.getenv("USE_ML_SENTIMENT", "false").lower() == "true"
+
+    if not use_ml:
+        return _analyze_heuristic(rating)
+
     if not text or not text.strip():
         return {
             "label": "neutral",
@@ -58,8 +76,6 @@ def analyze_text(text: str) -> dict:
         }
 
     classifier = get_classifier()
-
-    # top_k=3 — получаем scores для всех трёх классов
     results = classifier(text[:512], top_k=3)
 
     scores = {"POSITIVE": 0.0, "NEGATIVE": 0.0, "NEUTRAL": 0.0}
@@ -109,7 +125,7 @@ async def run_sentiment_for_brand(
             skipped += 1
             continue
 
-        sentiment = analyze_text(review.text)
+        sentiment = analyze_text(review.text, rating=review.rating)
 
         review.sentiment_label    = sentiment["label"]
         review.sentiment_positive = sentiment["positive"]
