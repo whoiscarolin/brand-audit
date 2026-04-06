@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from transformers import pipeline
+
 
 if TYPE_CHECKING:
     from app.models.review import Review
@@ -25,6 +25,10 @@ _classifier = None
 def get_classifier():
     global _classifier
     if _classifier is None:
+        import os
+        if os.getenv("USE_ML_SENTIMENT", "false").lower() != "true":
+            return None
+        from transformers import pipeline
         logger.info("Loading sentiment model...")
         _classifier = pipeline(
             "text-classification",
