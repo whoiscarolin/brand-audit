@@ -65,14 +65,21 @@ class BaseParser(ABC):
         s.headers.update(DEFAULT_HEADERS)
         return s
 
-    def _get(self, url: str, **kwargs) -> requests.Response:
-        """
-        Обёртка над session.get с логированием и случайной задержкой.
-        Задержка 1-3 сек — вежливый парсер не DDoSит источник.
-        """
+    dMAX_REQUESTS_PER_RUN = 10  # максимум запросов за один запуск парсера
+
+def _get(self, url: str, **kwargs) -> requests.Response:
+        if not hasattr(self, '_request_count'):
+            self._request_count = 0
+        
+        if self._request_count >= self.MAX_REQUESTS_PER_RUN:
+            raise Exception(
+                f"Достигнут лимит запросов ({self.MAX_REQUESTS_PER_RUN}) за один запуск"
+            )
+        
         delay = random.uniform(1.0, 3.0)
-        logger.debug(f"GET {url} (delay={delay:.1f}s)")
+        logger.debug(f"GET {url} (delay={delay:.1f}s, request={self._request_count + 1})")
         time.sleep(delay)
+        self._request_count += 1
         response = self.session.get(url, timeout=15, **kwargs)
         response.raise_for_status()
         return response
