@@ -14,6 +14,8 @@ from app.services.parse_service import run_parsing
 
 from fastapi import Depends
 
+from app.dependencies import get_api_key
+
 router = APIRouter(
     prefix="/parser",
     tags=["parser"],
