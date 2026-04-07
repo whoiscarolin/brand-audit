@@ -11,7 +11,14 @@ from app.db.session import get_db
 from app.services import brand_service
 from app.services.parse_service import run_parsing
 
-router = APIRouter(prefix="/parser", tags=["parser"])
+
+from fastapi import Depends
+
+router = APIRouter(
+    prefix="/parser",
+    tags=["parser"],
+    dependencies=[Depends(get_api_key)],
+)
 
 
 class ParseRequest(BaseModel):

@@ -11,7 +11,14 @@ from app.services.sentiment_service import (
     run_sentiment_for_brand,
 )
 
-router = APIRouter(prefix="/brands", tags=["sentiment"])
+from app.dependencies import get_api_key
+from fastapi import Depends
+
+router = APIRouter(
+    prefix="/brands",
+    tags=["sentiment"],
+    dependencies=[Depends(get_api_key)],
+)
 
 
 @router.post(
