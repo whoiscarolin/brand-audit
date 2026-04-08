@@ -31,13 +31,13 @@ class BrandUpdate(BaseModel):
 class BrandSummary(BaseModel):
     """Краткое представление бренда для списков."""
     model_config = ConfigDict(from_attributes=True)
-
     id: int
     name: str
     category: str | None
     city: str | None
     created_at: datetime
-
+    review_count: int = 0
+    avg_rating: float | None = None
 
 class BrandRead(BrandSummary):
     """Полное представление бренда (используется в GET /brands/{id})."""

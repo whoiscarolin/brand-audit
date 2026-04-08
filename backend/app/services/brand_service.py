@@ -18,14 +18,13 @@ async def get_all_brands(db: AsyncSession) -> list[tuple[Brand, int]]:
     Использует LEFT JOIN + COUNT — один запрос вместо N+1.
     """
     stmt = (
-        select(Brand, func.count(Review.id).label("review_count"))
+        select(Brand, func.count(Review.id).label("review_count"), func.avg(Review.rating).label("avg_rating"))
         .outerjoin(Review, Review.brand_id == Brand.id)
         .group_by(Brand.id)
         .order_by(Brand.created_at.desc())
     )
     result = await db.execute(stmt)
     return result.all()
-
 
 async def get_brand_by_id(db: AsyncSession, brand_id: int) -> tuple[Brand, int] | None:
     """Возвращает бренд по ID с количеством отзывов. None если не найден."""

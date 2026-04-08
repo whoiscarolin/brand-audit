@@ -31,10 +31,11 @@ async def list_brands(db: AsyncSession = Depends(get_db)) -> list[BrandSummary]:
     """Возвращает все бренды с количеством отзывов, сортировка по дате добавления."""
     rows = await brand_service.get_all_brands(db)
     result = []
-    for brand, review_count in rows:
+    for brand, review_count, avg_rating in rows:
         summary = BrandSummary.model_validate(brand)
+        summary.review_count = review_count
+        summary.avg_rating = round(avg_rating, 2) if avg_rating else None
         result.append(summary)
-    return result
 
 
 @router.post(
