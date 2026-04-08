@@ -36,6 +36,9 @@ async def list_brands(db: AsyncSession = Depends(get_db)) -> list[BrandSummary]:
         summary.review_count = review_count
         summary.avg_rating = round(avg_rating, 2) if avg_rating else None
         result.append(summary)
+    return result
+        
+
 
 
 @router.post(
