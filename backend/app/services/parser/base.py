@@ -35,12 +35,12 @@ class ParsedReview:
     Унифицированный формат отзыва — одинаковый для всех парсеров.
     Потом конвертируется в ReviewCreate для сохранения в БД.
     """
-    source: str                        # "2gis" | "yandex_maps"
+    source: str
     text: str | None
     rating: float | None
     author: str | None = None
     reviewed_at: datetime | None = None
-    raw: dict = field(default_factory=dict)   # сырые данные для отладки
+    raw: dict = field(default_factory=dict)
 
 
 class BaseParser(ABC):
@@ -48,16 +48,18 @@ class BaseParser(ABC):
     Абстрактный базовый парсер.
 
     Использование:
-        parser = TwoGisParser(brand_url="https://2gis.ru/...")
+        parser = YandexMapsParser(brand_url="https://yandex.com/maps/...")
         reviews = parser.run()
     """
 
-    SOURCE: str = ""  # переопределяется в каждом парсере
+    SOURCE: str = ""
+    MAX_REQUESTS_PER_RUN: int = 10  # максимум запросов за один запуск парсера
 
     def __init__(self, brand_url: str, max_reviews: int = 50):
         self.brand_url = brand_url
         self.max_reviews = max_reviews
         self.session = self._make_session()
+        self._request_count = 0
 
     def _make_session(self) -> Session:
         """Создаёт requests.Session с нужными заголовками."""
@@ -65,17 +67,17 @@ class BaseParser(ABC):
         s.headers.update(DEFAULT_HEADERS)
         return s
 
-    MAX_REQUESTS_PER_RUN = 10  # максимум запросов за один запуск парсера
-
-def _get(self, url: str, **kwargs) -> requests.Response:
-        if not hasattr(self, '_request_count'):
-            self._request_count = 0
-        
+    def _get(self, url: str, **kwargs) -> requests.Response:
+        """
+        Обёртка над session.get с логированием и случайной задержкой.
+        Задержка 1-3 сек — вежливый парсер не DDOSит источник.
+        Лимит запросов — защита от случайного перегруза.
+        """
         if self._request_count >= self.MAX_REQUESTS_PER_RUN:
             raise Exception(
                 f"Достигнут лимит запросов ({self.MAX_REQUESTS_PER_RUN}) за один запуск"
             )
-        
+
         delay = random.uniform(1.0, 3.0)
         logger.debug(f"GET {url} (delay={delay:.1f}s, request={self._request_count + 1})")
         time.sleep(delay)
