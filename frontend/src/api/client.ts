@@ -1,6 +1,7 @@
 const BASE_URL = 'https://brand-audit-a753.onrender.com'
+const API_KEY = 'brandaudit_secret_2026'
 
-const USE_MOCK = true
+const USE_MOCK = false
 
 const MOCK_BRANDS = [
   { id: 1, name: 'Кафе Пушкин', rating: 4.7, reviews_count: 128 },
@@ -34,7 +35,7 @@ export async function getBrands() {
 
 export async function getReviews(brandId: number) {
   if (USE_MOCK) return MOCK_REVIEWS[brandId] || []
-  const response = await fetch(`${BASE_URL}/brands/${brandId}/reviews`)
+  const response = await fetch(`${BASE_URL}/reviews?brand_id=${brandId}`)
   return response.json()
 }
 
@@ -46,8 +47,19 @@ export async function getSentiment(brandId: number) {
 export async function runParser(brandId: number) {
   const response = await fetch(`${BASE_URL}/parser/run`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': API_KEY
+    },
     body: JSON.stringify({ brand_id: brandId })
+  })
+  return response.json()
+}
+
+export async function runSentiment(brandId: number) {
+  const response = await fetch(`${BASE_URL}/brands/${brandId}/sentiment/run`, {
+    method: 'POST',
+    headers: { 'X-API-Key': API_KEY }
   })
   return response.json()
 }

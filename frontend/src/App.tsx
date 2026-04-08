@@ -28,13 +28,16 @@ function App() {
 
   useEffect(() => {
     if (selectedBrand !== null) {
-      getReviews(selectedBrand).then(setReviews).catch(() => setReviews([]))
+      getReviews(selectedBrand)
+        .then(data => setReviews(Array.isArray(data) ? data : []))
+        .catch(() => setReviews([]))
     }
   }, [selectedBrand])
 
-  const positive = reviews.filter(r => r.sentiment === 'positive').length
-  const neutral = reviews.filter(r => r.sentiment === 'neutral').length
-  const negative = reviews.filter(r => r.sentiment === 'negative').length
+  const safeReviews = Array.isArray(reviews) ? reviews : []
+  const positive = safeReviews.filter(r => r.sentiment_label === 'positive').length
+  const neutral = safeReviews.filter(r => r.sentiment_label === 'neutral').length
+  const negative = safeReviews.filter(r => r.sentiment_label === 'negative').length
   const selectedBrandData = brands.find(b => b.id === selectedBrand)
 
   return (
@@ -87,7 +90,7 @@ function App() {
                   cursor: 'pointer'
                 }}
               >
-                <BrandCard brand={brand} />
+                <BrandCard brand={brand} reviewsCount={selectedBrand === brand.id ? reviews.length : undefined} />
               </div>
             ))
           }
@@ -102,9 +105,9 @@ function App() {
             marginBottom: '24px'
           }}>
             {[
-              { label: 'Средний рейтинг', value: `⭐ ${selectedBrandData.rating}`, color: '#e8e8f0' },
-              { label: 'Всего отзывов', value: selectedBrandData.reviews_count, color: '#e8e8f0' },
-              { label: 'Позитивных', value: `${Math.round(positive / (reviews.length || 1) * 100)}%`, color: '#00c9a7' },
+              { label: 'Средний рейтинг', value: reviews.length > 0 ? `⭐ ${(reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1)}` : '—', color: '#e8e8f0' },
+              { label: 'Всего отзывов', value: reviews.length, color: '#e8e8f0' },
+              { label: 'Позитивных', value: `${Math.round(positive / (safeReviews.length || 1) * 100)}%`, color: '#00c9a7' },
             ].map((metric, i) => (
               <div key={i} style={{
                 background: '#16161a',
@@ -131,7 +134,7 @@ function App() {
           marginBottom: '24px'
         }}>
           <SentimentChart positive={positive} neutral={neutral} negative={negative} />
-          {reviews.length > 0 && <ReviewTable reviews={reviews} />}
+          {safeReviews.length > 0 && <ReviewTable reviews={safeReviews} />}
         </div>
 
         {/* Кнопка PDF */}

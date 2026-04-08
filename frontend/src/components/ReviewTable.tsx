@@ -2,18 +2,19 @@ interface Review {
   id: number
   text: string
   rating: number
-  sentiment: string
+  sentiment_label: string | null
 }
 
-function sentimentColor(sentiment: string) {
+function sentimentColor(sentiment: string | null) {
   if (sentiment === 'positive') return '#00c9a7'
   if (sentiment === 'negative') return '#ff6b6b'
   return '#f5c542'
 }
 
-function sentimentLabel(sentiment: string) {
+function sentimentLabel(sentiment: string | null) {
   if (sentiment === 'positive') return 'позитив'
   if (sentiment === 'negative') return 'негатив'
+  if (sentiment === null) return '—'
   return 'нейтраль'
 }
 
@@ -24,8 +25,8 @@ function ReviewTable({ reviews }: { reviews: Review[] }) {
       {reviews.map(review => (
         <div key={review.id} style={{ color: '#6b6b80', fontSize: '13px', padding: '12px 0', borderBottom: '1px solid #2a2a35' }}>
           {'⭐'.repeat(review.rating)} &nbsp; {review.text} &nbsp;
-          <span style={{ color: sentimentColor(review.sentiment) }}>
-            {sentimentLabel(review.sentiment)}
+          <span style={{ color: sentimentColor(review.sentiment_label) }}>
+            {sentimentLabel(review.sentiment_label)}
           </span>
         </div>
       ))}
