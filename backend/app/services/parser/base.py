@@ -65,7 +65,7 @@ class BaseParser(ABC):
         s.headers.update(DEFAULT_HEADERS)
         return s
 
-    dMAX_REQUESTS_PER_RUN = 10  # максимум запросов за один запуск парсера
+    MAX_REQUESTS_PER_RUN = 10  # максимум запросов за один запуск парсера
 
 def _get(self, url: str, **kwargs) -> requests.Response:
         if not hasattr(self, '_request_count'):
