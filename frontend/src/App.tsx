@@ -140,9 +140,20 @@ function App() {
         {/* Кнопка PDF */}
         <div className="animate animate-5" style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
-            className="pdf-btn"
-            disabled
-            title="Будет доступно после деплоя бэкенда"
+  className="pdf-btn"
+  onClick={async () => {
+    if (!selectedBrand) return
+    const response = await fetch(`https://brand-audit-a753.onrender.com/brands/${selectedBrand}/report/download`, {
+      headers: { 'X-API-Key': 'brandaudit_secret_2026' }
+    })
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `report-brand-${selectedBrand}.pdf`
+    a.click()
+    URL.revokeObjectURL(url)
+  }}
             style={{
               background: '#6c63ff',
               color: '#e8e8f0',
